@@ -253,6 +253,7 @@ def get_ns_specific_fluorescence_traces(exp, raw, binned = False, t_win=0):
     pr_smooth, _ = epf.extract_smooth_pupil(exp)         # Sigma is defaulted to 4
     rs_smooth = erf.extract_smooth_running_speed(exp)    # Sigma is deafult = 2
     rr_smooth = erf.extract_smooth_running_rate(exp)     # Sigma is default = 2
+    run_stat = erf.extract_is_running(exp, 1)
     stim = 'natural_scenes'
     stim_table = exp.get_stimulus_table(stim)
     unique_stim = np.sort(exp.get_stimulus_table('natural_scenes')['frame'].unique(), axis=None)
@@ -267,6 +268,7 @@ def get_ns_specific_fluorescence_traces(exp, raw, binned = False, t_win=0):
     pr_smooth_temp = dict()
     rs_smooth_temp = dict()
     rr_smooth_temp = dict()
+    run_stat_temp = dict()
 
     if binned:
         for i, u_s in enumerate(unique_stim):
@@ -282,6 +284,7 @@ def get_ns_specific_fluorescence_traces(exp, raw, binned = False, t_win=0):
             pr_smooth_temp[u_s] = []
             rr_smooth_temp[u_s] = []
             rs_smooth_temp[u_s] = []
+            run_stat_temp[u_s] = []
 
             for j in range(0, len(start)):
                     dff_temp[u_s].append(np.nanmean(dff[:,start[j]:end[j]], axis = 1))
@@ -294,6 +297,7 @@ def get_ns_specific_fluorescence_traces(exp, raw, binned = False, t_win=0):
                     pr_smooth_temp[u_s].append(np.nanmean(pr_smooth[start[j]:end[j]]))
                     rr_smooth_temp[u_s].append(np.nanmean(rr_smooth[start[j]:end[j]]))
                     rs_smooth_temp[u_s].append(np.nanmean(rs_smooth[start[j]:end[j]]))
+                    run_stat_temp[u_s].append(np.nanmean(run_stat[start[j]:end[j]]))
     else:
         for i, u_s in enumerate(unique_stim):
             start = stim_table['start'][stim_table['frame']==u_s].values
@@ -308,6 +312,7 @@ def get_ns_specific_fluorescence_traces(exp, raw, binned = False, t_win=0):
             pr_smooth_temp[u_s] = []
             rs_smooth_temp[u_s] = []
             rr_smooth_temp[u_s] = []
+            run_stat_temp[u_s] = []
             for j in range(0, len(start)):
                     dff_temp[u_s].append(dff[:,start[j]:end[j]])
                     pr_temp[u_s].append(pr[start[j]:end[j]])
@@ -319,6 +324,7 @@ def get_ns_specific_fluorescence_traces(exp, raw, binned = False, t_win=0):
                     pr_smooth_temp[u_s].append((pr_smooth[start[j]:end[j]]))
                     rs_smooth_temp[u_s].append((rs_smooth[start[j]:end[j]]))
                     rr_smooth_temp[u_s].append((rr_smooth[start[j]:end[j]]))
+                    run_stat_temp[u_s].append(run_stat[start[j]:end[j]])
     output = dict()
     columns = sorted(dff_temp.keys())
     output['fluorescence'] = pd.DataFrame(data=dff_temp, columns=columns)
@@ -332,6 +338,7 @@ def get_ns_specific_fluorescence_traces(exp, raw, binned = False, t_win=0):
     output['pupil smooth'] = pd.DataFrame(data= pr_smooth_temp, columns = columns)
     output['running speed smooth'] = pd.DataFrame(data= rs_smooth_temp, columns = columns)
     output['running rate smooth'] = pd.DataFrame(data= rr_smooth_temp, columns = columns)
+    output['run_stat'] = pd.DataFrame(data= run_stat_temp, columns = columns)
     return output, cell_ids
 
 def get_ns_dff_by_trial(exp, cell_specimen_ids=None):

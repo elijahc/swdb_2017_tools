@@ -3,8 +3,8 @@ import pandas as pd
 import load_by_stim as lbs
 from swdb2017.brain_observatory.utilities.z_score import z_score
 from swdb2017.brain_observatory.behavior.correlation_matrix import pearson_corr_coeff
-
-def PCA_batch(data_set, stim_type, images = 0):
+import extract_running_features as erf
+def PCA_batch(data_set, stim_type, images = 0, splitby = 0):
     '''
     Uses singular value decomposition to decompose population activity into
     its principle components for a given stimulus. Runs correlation analysis
@@ -91,48 +91,172 @@ def PCA_batch(data_set, stim_type, images = 0):
         # Concatenate all spont periods into a numpy matrix for use with PCA and
         # correlation analysis. Do this for df/F and for all behavioral readouts
 
-        out.pop('pupil location', None)
-        keys = out.keys()
-        behavior_df = pd.DataFrame([], index = [0], columns = keys)
-        for key in out.keys():
-            if key == 'fluorescence':
-                behavior_df[key][0] = z_score((np.concatenate(out['fluorescence'][image][0:nTrials], axis=1)))
-            else:
-                behavior_df[key][0] = (np.concatenate(out[key][image][0:nTrials].values, axis=0))
+        if splitby == 0:
+            out.pop('pupil location', None)
+            keys = out.keys()
+            behavior_df = pd.DataFrame([], index = [0], columns = keys)
+            for key in out.keys():
+                if key == 'fluorescence':
+                    behavior_df[key][0] = z_score((np.concatenate(out['fluorescence'][image][0:nTrials], axis=1)))
+                else:
+                    behavior_df[key][0] = (np.concatenate(out[key][image][0:nTrials].values, axis=0))
 
-        # Perform SVD on fluorescence traces
-        U, S, V = np.linalg.svd(behavior_df['fluorescence'][0])
-        pcs = U*S
-        axes = V.T
-        weights = S
-        nPcs = nCells
-        var_explained = np.empty(nPcs)
-        for i in range(0, len(S)):
-            var_explained[i]=(sum(S[0:i+1])/sum(S))
+            # Perform SVD on fluorescence traces
+            U, S, V = np.linalg.svd(behavior_df['fluorescence'][0])
+            pcs = U*S
+            axes = V.T
+            weights = S
+            nPcs = nCells
+            var_explained = np.empty(nPcs)
+            for i in range(0, len(S)):
+                var_explained[i]=(sum(S[0:i+1])/sum(S))
 
-        # perform correlation for each behavioral readout with each princile axes
-        # gets rid of readouts that don't matter
-        l = ['fluorescence', 'time', 'pupil location']
-        for ids in l:
-            out.pop(ids, None)
+            # perform correlation for each behavioral readout with each princile axes
+            # gets rid of readouts that don't matter
+            l = ['fluorescence', 'time', 'pupil location']
+            for ids in l:
+                out.pop(ids, None)
 
-        fraction = float(np.where(var_explained > 0.5)[0][0])/float(nPcs)
-        columns = np.sort(out.keys())
-        corr_mat = pd.DataFrame([], index = np.arange(0,nPcs), columns = columns)
-        for i in np.arange(0, nPcs):
-            for key in columns:
-                if key != 'fluorescence':
-                    corr_mat[key][i] = pearson_corr_coeff(axes[i], behavior_df[key][0])
-        corr_mat = corr_mat[corr_mat.columns].astype(float)
+            fraction = float(np.where(var_explained > 0.5)[0][0])/float(nPcs)
+            columns = np.sort(out.keys())
+            corr_mat = pd.DataFrame([], index = np.arange(0,nPcs), columns = columns)
+            for i in np.arange(0, nPcs):
+                for key in columns:
+                    if key != 'fluorescence':
+                        corr_mat[key][i] = pearson_corr_coeff(axes[i], behavior_df[key][0])
+            corr_mat = corr_mat[corr_mat.columns].astype(float)
+
+            PCA = dict()
+            PCA['PCs'] = pcs
+            PCA['axes'] = axes
+            PCA['weights'] = weights
+            PCA['var_explained'] = var_explained
+            PCA['fraction_pcs'] = fraction
+            Behavior = dict()
+            Behavior['data'] = behavior_df
+            Behavior['corr_mat'] = corr_mat
+
+        elif splitby == 'run':
+            out.pop('pupil location', None)
+            keys = out.keys()
+            states = ['run', 'stationary']
+            behavior_df = pd.DataFrame([], index = ['run', 'stationary'], columns = keys)
 
 
-    PCA = dict()
-    PCA['PCs'] = pcs
-    PCA['axes'] = axes
-    PCA['weights'] = weights
-    PCA['var_explained'] = var_explained
-    PCA['fraction_pcs'] = fraction
-    Behavior = dict()
-    Behavior['data'] = behavior_df
-    Behavior['corr_mat'] = corr_mat
+            run_inds = []
+            stat_inds = []
+            for i in range(0, nTrials):
+                if np.nanmean(out['run_stat'][image][i]) > 0:
+                    run_inds.append(i)
+                else:
+                    stat_inds.append(i)
+
+            for key in out.keys():
+                for state in states:
+                    if key == 'fluorescence' and state == 'run':
+                        if len(run_inds) > 0:
+                            behavior_df[key][state] = z_score((np.concatenate(out['fluorescence'][image][run_inds].values, axis=1)))
+                        else:
+                            behavior_df[key][state] = out['fluorescence'][image][run_inds].values
+                    elif key == 'fluorescence' and state =='stationary':
+                        if len(stat_inds) > 0:
+                            behavior_df[key][state] = z_score((np.concatenate(out['fluorescence'][image][stat_inds].values, axis=1)))
+                        else:
+                            behavior_df[key][state] = out['fluorescence'][image][stat_inds].values
+                    elif key != 'fluorescence' and state == 'run':
+                        if len(run_inds) > 0:
+                            behavior_df[key][state] = (np.concatenate(out[key][image][run_inds].values, axis=0))
+                        else:
+                            behavior_df[key][state] = out[key][image][run_inds].values
+                    elif key != 'fluorescence' and state == 'stationary':
+                        if len(stat_inds) > 0:
+                            behavior_df[key][state] = (np.concatenate(out[key][image][stat_inds].values, axis=0))
+                        else:
+                            behavior_df[key][state] = out[key][image][stat_inds].values
+
+            PCA = dict()
+            Behavior = dict()
+            # Perform SVD on fluorescence traces for staitonary trials
+            if (len(behavior_df['fluorescence']['stationary'].shape) > 1 and nCells < behavior_df['fluorescence']['stationary'].shape[1]):
+                U, S, V = np.linalg.svd(behavior_df['fluorescence']['stationary'])
+                pcs = U*S
+                axes = V.T
+                weights = S
+                nPcs = nCells
+                var_explained = np.empty(nPcs)
+                for i in range(0, len(S)):
+                    var_explained[i]=(sum(S[0:i+1])/sum(S))
+
+                fraction = float(np.where(var_explained > 0.5)[0][0])/float(nPcs)
+
+                # perform correlation for each behavioral readout with each princile axes
+                # gets rid of readouts that don't matter
+                l = ['fluorescence', 'time', 'pupil location']
+                for ids in l:
+                    out.pop(ids, None)
+
+                columns = np.sort(out.keys())
+                corr_mat = pd.DataFrame([], index = np.arange(0,nPcs), columns = columns)
+                for i in np.arange(0, nPcs):
+                    for key in columns:
+                        if key != 'fluorescence':
+                            corr_mat[key][i] = pearson_corr_coeff(axes[i], behavior_df[key]['stationary'])
+                corr_mat = corr_mat[corr_mat.columns].astype(float)
+
+
+                PCA['PCs'] = pcs
+                PCA['axes'] = axes
+                PCA['weights'] = weights
+                PCA['var_explained'] = var_explained
+                PCA['fraction_pcs'] = fraction
+                Behavior['corr_mat'] = corr_mat.T
+
+                PCA['PCs_run'] = []
+                PCA['axes_run'] = []
+                PCA['weights_run'] = []
+                PCA['var_explained_run'] = []
+                PCA['fraction_pcs_run'] = []
+                Behavior['corr_mat_run'] = []
+
+            # Perform SVD on fluorescence traces for running trials
+            if (len(behavior_df['fluorescence']['run'].shape) > 1 and nCells < behavior_df['fluorescence']['run'].shape[1]):
+                U_run, S_run, V_run = np.linalg.svd(behavior_df['fluorescence']['run'])
+                pcs_run = U_run*S_run
+                axes_run = V_run.T
+                weights_run = S_run
+                nPcs_run = nCells
+                var_explained_run = np.empty(nPcs_run)
+                for i in range(0, len(S_run)):
+                    var_explained_run[i]=(sum(S_run[0:i+1])/sum(S_run))
+
+                fraction_run = float(np.where(var_explained_run > 0.5)[0][0])/float(nPcs_run)
+
+                # perform correlation for each behavioral readout with each princile axes
+                # gets rid of readouts that don't matter
+                l = ['fluorescence', 'time', 'pupil location']
+                for ids in l:
+                    out.pop(ids, None)
+
+                columns_run = np.sort(out.keys())
+                corr_mat_run = pd.DataFrame([], index = np.arange(0,nPcs_run), columns = columns_run)
+                for i in np.arange(0, nPcs_run):
+                    for key in columns_run:
+                        if key != 'fluorescence':
+                            corr_mat_run[key][i] = pearson_corr_coeff(axes_run[i], behavior_df[key]['run'])
+                corr_mat_run = corr_mat_run[corr_mat_run.columns].astype(float)
+
+                PCA['PCs_run'] = pcs_run
+                PCA['axes_run'] = axes_run
+                PCA['weights_run'] = weights_run
+                PCA['var_explained_run'] = var_explained_run
+                PCA['fraction_pcs_run'] = fraction_run
+                Behavior['corr_mat_run'] = corr_mat_run.T
+
+                PCA['PCs'] = []
+                PCA['axes'] = []
+                PCA['weights'] = []
+                PCA['var_explained'] = []
+                PCA['fraction_pcs'] = []
+                Behavior['corr_mat'] = []
+            Behavior['data'] = []
     return PCA, Behavior
