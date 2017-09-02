@@ -19,7 +19,7 @@ if stim_type == 'natural_scenes':
     for image in images:
         manifest_path = os.path.join('/media/charlie/Brain2017/data/dynamic-brain-workshop/trash_cache/nsPCA/split_by_run', str(image))
         fig_path = os.path.join('/home/charlie/Desktop/PCA_plots/nat_scenes/split_by_run',str(image))
-        os.makedirs(fig_path)
+        #os.makedirs(fig_path)
 
         tc = TrashCache(os.path.join(manifest_path, 'trash_cache_manifest.json'))
         exps = os.listdir(os.path.join(manifest_path, 'exps'))
@@ -167,7 +167,7 @@ if stim_type == 'natural_scenes':
         ax[1].set_xlabel('Fraction of Dimensions')
         ax[1].set_ylabel('Variance explained')
         ax[1].set_title('Run trials, image: %s' %image)
-        plt.savefig(os.path.join(fig_path, 'var.svg'))
+        #plt.savefig(os.path.join(fig_path, 'var.svg'))
 
         data = [fr_p, fr_l, fr_al, fr_pm, fr_am, fr_rl]
         plt.figure()
@@ -175,7 +175,7 @@ if stim_type == 'natural_scenes':
         plt.title('Fraction of dimensions need to explain 50 percent of variance \n image: %s, Stationary' %image)
         plt.ylabel('Fraction of dimensions')
         plt.xticks([1,2,3,4,5,6], ['VISp','VISl','VISal','VISpm','VISam','VISrl'])
-        plt.savefig(os.path.join(fig_path, 'var_explained_stationary.svg'))
+        #plt.savefig(os.path.join(fig_path, 'var_explained_stationary.svg'))
 
         data = [fr_p_run, fr_l_run, fr_al_run, fr_pm_run, fr_am_run, fr_rl_run]
         plt.figure()
@@ -183,7 +183,7 @@ if stim_type == 'natural_scenes':
         plt.title('Fraction of dimensions need to explain 50 percent of variance \n image: %s, Running' %image)
         plt.ylabel('Fraction of dimensions')
         plt.xticks([1,2,3,4,5,6], ['VISp','VISl','VISal','VISpm','VISam','VISrl'])
-        plt.savefig(os.path.join(fig_path, 'var_explained_run.svg'))
+        #plt.savefig(os.path.join(fig_path, 'var_explained_run.svg'))
 
         data = [fr_p_paired, fr_l_paired, fr_al_paired, fr_pm_paired, fr_am_paired, fr_rl_paired]
         print(fr_p_paired)
@@ -199,7 +199,7 @@ if stim_type == 'natural_scenes':
         plt.figure()
         plt.imshow(stim_template[image], cmap = 'gray')
         plt.title("%s" %image)
-        plt.savefig(os.path.join(fig_path, 'image.svg'))
+        #plt.savefig(os.path.join(fig_path, 'image.svg'))
 
 # --------------------- Plotting for spont analysis ---------------------------
 

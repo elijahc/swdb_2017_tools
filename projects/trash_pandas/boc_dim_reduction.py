@@ -14,8 +14,8 @@ from matplotlib.collections import LineCollection
 import scipy.ndimage.filters as filt
 from swdb2017.brain_observatory.behavior.correlation_matrix import pearson_corr_coeff
 from swdb2017.brain_observatory.utilities.z_score import z_score
-import extract_pupil_features as epf
-import extract_running_features as err
+import behavior.extract_pupil_features as epf
+import bheavior.extract_running_features as err
 
 # Import brain observatory cache class. This is responsible for downloading any data
 # or metadata
