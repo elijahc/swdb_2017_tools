@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-import extract_pupil_features as epf
-import extract_running_features as erf
+from swdb2017.brain_observatory.behavior.extract_pupil_features import *
+from swdb2017.brain_observatory.behavior.extract_running_features import *
 import matplotlib.pyplot as plt
 
 def get_grating_specific_traces(exp, raw, binned=False, t_win=0):
@@ -39,11 +39,11 @@ def get_grating_specific_traces(exp, raw, binned=False, t_win=0):
     t, pr = exp.get_pupil_size()
     t, pl = exp.get_pupil_location(as_spherical = False)
     rs, t = exp.get_running_speed()
-    p_rate, _ = epf.extract_smooth_pupil_rate(exp)
-    pr_smooth, _ = epf.extract_smooth_pupil(exp)         # Sigma is defaulted to 4
-    sac_rate = epf.extract_smooth_saccade_rate(exp)
-    rs_smooth = erf.extract_smooth_running_speed(exp)    # Sigma is deafult = 2
-    rr_smooth = erf.extract_smooth_running_rate(exp)     # Sigma is default = 2
+    p_rate, _ =extract_smooth_pupil_rate(exp)
+    pr_smooth, _ = extract_smooth_pupil(exp)         # Sigma is defaulted to 4
+    sac_rate = extract_smooth_saccade_rate(exp)
+    rs_smooth = extract_smooth_running_speed(exp)    # Sigma is deafult = 2
+    rr_smooth = extract_smooth_running_rate(exp)     # Sigma is default = 2
 
     stim_table = exp.get_stimulus_table('static_gratings')
 
@@ -147,11 +147,11 @@ def get_spont_specific_fluorescence_traces(exp, raw, binned=False, t_win=0):
     t, pr = exp.get_pupil_size()
     t, pl = exp.get_pupil_location(as_spherical = False)
     rs, t = exp.get_running_speed()
-    p_rate, _ = epf.extract_smooth_pupil_rate(exp)
-    sac_rate = epf.extract_smooth_saccade_rate(exp)
-    pr_smooth, _ = epf.extract_smooth_pupil(exp)         # Sigma is defaulted to 4
-    rs_smooth = erf.extract_smooth_running_speed(exp)    # Sigma is deafult = 2
-    rr_smooth = erf.extract_smooth_running_rate(exp)     # Sigma is default = 2
+    p_rate, _ = extract_smooth_pupil_rate(exp)
+    sac_rate = extract_smooth_saccade_rate(exp)
+    pr_smooth, _ =extract_smooth_pupil(exp)         # Sigma is defaulted to 4
+    rs_smooth = extract_smooth_running_speed(exp)    # Sigma is deafult = 2
+    rr_smooth = extract_smooth_running_rate(exp)     # Sigma is default = 2
 
     stim_table = exp.get_spontaneous_activity_stimulus_table()
     dff_temp = dict(spont=[])
@@ -248,11 +248,11 @@ def get_ns_specific_fluorescence_traces(exp, raw, binned = False, t_win=0):
     t, pr = exp.get_pupil_size()
     t, pl = exp.get_pupil_location(as_spherical = False)
     rs, t = exp.get_running_speed()
-    p_rate, _ = epf.extract_smooth_pupil_rate(exp)
-    sac_rate = epf.extract_smooth_saccade_rate(exp)
-    pr_smooth, _ = epf.extract_smooth_pupil(exp)         # Sigma is defaulted to 4
-    rs_smooth = erf.extract_smooth_running_speed(exp)    # Sigma is deafult = 2
-    rr_smooth = erf.extract_smooth_running_rate(exp)     # Sigma is default = 2
+    p_rate, _ = extract_smooth_pupil_rate(exp)
+    sac_rate = extract_smooth_saccade_rate(exp)
+    pr_smooth, _ = extract_smooth_pupil(exp)         # Sigma is defaulted to 4
+    rs_smooth = extract_smooth_running_speed(exp)    # Sigma is deafult = 2
+    rr_smooth = extract_smooth_running_rate(exp)     # Sigma is default = 2
     stim = 'natural_scenes'
     stim_table = exp.get_stimulus_table(stim)
     unique_stim = np.sort(exp.get_stimulus_table('natural_scenes')['frame'].unique(), axis=None)
