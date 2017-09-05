@@ -181,39 +181,36 @@ def corr_ns_behavior(exp, raw=False):
     return ns_behavior_corr_df
 
 
-def count_corr_cells(df, threshold):
+def count_corr_cells(arr, threshold):
     """
-    Counts number of values in each column (behavior feature correlation) above
+    Counts number of values (behavior feature correlation) above
     an input threshold and below -threshold separately
 
     Parameters:
     ----------
-    df : pandas dataframe
-        contains pearson correlation coefficients from behavior features
+    arr : array-like
+        contains pearson correlation coefficients from behavior feature
     threshold : float
         between 0 and 1
 
     Returns:
     -------
-    pos_count : array
-        contains a summed value of significant correlations for each feature
-    neg_count : array
-        contains a summed value of significant correaltion for each feature
+    pos_count : int
+        contains a summed value of significant correlations for feature
+    neg_count : int
+        contains a summed value of significant correaltion for feature
     """
 
     # Initialize components
-    df_keys = df.columns[1:]
-    is_sig_pos = np.zeros((len(df[df.columns[0]].values), len(df_keys)))
-    is_sig_neg = np.zeros((len(df[df.columns[0]].values), len(df_keys)))
+    is_sig_pos = np.zeros((len(arr), 1))
+    is_sig_neg = np.zeros((len(arr), 1))
 
     # Assign values based on threshold
-    for i, key in enumerate(df_keys):
-        vals = df[key].values
-        is_sig_pos[(vals > threshold), i] = 1
-        is_sig_neg[(vals < -threshold), i] = 1
+    is_sig_pos[(arr > threshold)] = 1
+    is_sig_neg[(arr < -threshold)] = 1
 
     # Sum values
     pos_count = np.sum(is_sig_pos, axis=0)
     neg_count = np.sum(is_sig_neg, axis=0)
 
-    return pos_count, neg_count
+    return int(pos_count), int(neg_count)

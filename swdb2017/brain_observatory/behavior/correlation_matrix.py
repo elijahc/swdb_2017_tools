@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import swdb2017.brain_observatory.behavior.extract_pupil_features as epf
 import swdb2017.brain_observatory.behavior.extract_running_features as erf
-from allensdk.core.brain_observatory_cache import BrainObservatoryCache
 
 def pearson_corr_coeff(x, y):
     '''

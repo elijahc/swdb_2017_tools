@@ -153,7 +153,7 @@ def plot_running_speed(boc, behavior_df):
         plt.xlabel('Time (s)')
         plt.ylabel('Running Speed (cm/s)')
 
-def remove_nans(data):
+def remove_nans(data, convert_to_df = True):
     ''' Remove NaNs from data.
 
     Parameters
@@ -162,6 +162,8 @@ def remove_nans(data):
 
     Returns
     -------
+    df_nonans : pandas dataframe
+        converts data_nonans and idx_nonans into a dataframe. Optional (default = True)
     data_nonans : array
         original data with no NaNs
     idx_nonans : array
@@ -172,7 +174,12 @@ def remove_nans(data):
     temp = data
     data_nonans = temp[idx_nonans]
 
-    return data_nonans, idx_nonans
+    if convert_to_df == True:
+        df_nonans = pd.DataFrame({"data_nonans" : data_nonans, "idx" : idx_nonans})
+    elif convert_to_df == False:
+        return data_nonans, idx_nonans
+    else:
+        print('Invalid input for data type.')
 
 def smooth_data(df_nonans, keys, sigma):
     '''
@@ -273,7 +280,7 @@ def get_processed_behavior_data(boc, targeted_structures=None, stims=None, cre_l
 
     filtered_df = get_filtered_df(boc, targeted_structures=targeted_structures, stims=stims, cre_lines=cre_lines)
     behavior_df = get_behavior_df(boc, filtered_df)
-    df_nonans = remove_nans(behavior_df, ['speed_cm_s'])
+    df_nonans = remove_nans(np.array(behavior_df['speed_cm_s']), convert_to_df=True)
     df_smooth = smooth_data(df_nonans, ['speed_cm_s'], sigma)
     smoothed_traces = plot_smoothed_trace(df_smooth, ['speed_cm_s', 'speed_cm_s_smooth'])
 

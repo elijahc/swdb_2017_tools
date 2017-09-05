@@ -19,7 +19,28 @@ from trash_cache import TrashCache
 tc = TrashCache(manifest_fp='/home/fionag/tpc/trash_cache_manifest.json')
 
 def save_behavior_correlations(boc, tc, experiment_ids=[], features=[], figure=False):
-    for i in tqdm_notebook(experiment_ids):
+    """
+    Save pearson correlation coefficients for behavior-behavior correlations, and behavior-fluorescence trace
+    correlations (natural scenes and spontaneous activity only) from Allen Brain Observatory data.
+
+    Parameters:
+    ----------
+    boc : BrainObservatory Cache instance
+    tc : TrashCache instance
+    experiment_ids : list
+        list of ophys experiment ids to get correlations for
+    features : list
+        list of behavioral features to get correlations for. Options = 'pupil_area_rate',
+        'saccade_rate', 'pupil_area_smooth', 'running_speed_smooth', 'running_rate_smooth'
+    figure : boolean
+        if True, will save an image of the correlation matrix to the TrashCache
+
+    Returns:
+    -------
+    dict : saves information (correlation dataframes, metadata, figure (optional) as a dictionary to the TrashCache
+
+    """
+    for i in experiment_ids:
         # Load data
         exp_data = boc.get_ophys_experiment_data(i)
         exp_meta = exp_data.get_metadata()
