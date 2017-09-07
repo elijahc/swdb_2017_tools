@@ -1,17 +1,5 @@
-import os
-import numpy as np
-import pandas as pd
-import seaborn as sns
-import sys
-import h5py
-from scipy.ndimage.filters import gaussian_filter
-import matplotlib.pyplot as plt
-%matplotlib inline
-from tqdm import tqdm_notebook
 
-from swdb2017.brain_observatory.behavior.get_pupil_size_data import has_pupil_data_df
-import swdb2017.brain_observatory.behavior.extract_pupil_features as epf
-import swdb2017.brain_observatory.behavior.extract_running_features as erf
+#Imports
 import swdb2017.brain_observatory.behavior.correlate_fluor_behavior as cfb
 import swdb2017.brain_observatory.behavior.correlation_matrix as cm
 

@@ -21,7 +21,6 @@ def corr_spont_behavior(exp, raw=False):
     -------
     spont_behavior_corr_df : pandas dataframe
       contains pearson corelation coefficients split by behavior features being correlated (column) by cell id (row)
-
     '''
 
     stim_table = exp.get_spontaneous_activity_stimulus_table()
@@ -62,7 +61,6 @@ def corr_spont_behavior(exp, raw=False):
         running_rate_smooth_temp.append(running_rate_smooth[start:end])
 
     dff_stack = np.hstack(dff_temp)
-    timestamps_stack = np.hstack(timestamps_temp)
     pupil_area_rate_stack = np.hstack(pupil_area_rate_temp)
     saccade_rate_stack = np.hstack(saccade_rate_temp)
     pupil_area_smooth_stack = np.hstack(pupil_area_smooth_temp)
@@ -150,7 +148,6 @@ def corr_ns_behavior(exp, raw=False):
         running_rate_smooth_temp.append(running_rate_smooth[start[j]:end[j]])
 
     dff_stack = np.hstack(dff_temp)
-    timestamps_stack = np.hstack(timestamps_temp)
     pupil_area_rate_stack = np.hstack(pupil_area_rate_temp)
     saccade_rate_stack = np.hstack(saccade_rate_temp)
     pupil_area_smooth_stack = np.hstack(pupil_area_smooth_temp)
@@ -196,9 +193,9 @@ def count_corr_cells(arr, threshold):
     Returns:
     -------
     pos_count : int
-        contains a summed value of significant correlations for feature
+        contains a summed value of significant positive correlations for feature
     neg_count : int
-        contains a summed value of significant correaltion for feature
+        contains a summed value of significant negative correlations for feature
     """
 
     # Initialize components
