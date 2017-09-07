@@ -14,8 +14,8 @@ from matplotlib.collections import LineCollection
 import scipy.ndimage.filters as filt
 from swdb2017.brain_observatory.behavior.correlation_matrix import pearson_corr_coeff
 from swdb2017.brain_observatory.utilities.z_score import z_score
-import extract_pupil_features as epf
-import extract_running_features as err
+from swdb2017.brain_observatory.behavior.extract_pupil_features import *
+#import extract_running_features as err
 
 # Import brain observatory cache class. This is responsible for downloading any data
 # or metadata
@@ -43,6 +43,14 @@ for i, exp in enumerate(exps_):
 exp_id = exps[6]['id']
 data_set = boc.get_ophys_experiment_data(ophys_experiment_id = exp_id)
 meta_data = data_set.get_metadata()
+
+### Create sample image of pop activity over all cells and stim
+t, ex = data_set.get_dff_traces()
+plt.imshow(ex, aspect = 'auto', cmap='plasma')
+plt.ylabel('Neurons')
+plt.xlabel('Time')
+plt.show()
+
 
 ############ Load and pre-process data for dim-reduction #####################
 
@@ -109,8 +117,17 @@ for i in np.arange(0, len(ns_cell_ids), 7):
 xcoords = np.arange(0, dff_ns.shape[1], 7)
 
 for xc in xcoords:
-    plt.axvline(x=xc)
+    plt.axvline(x=xc, linestyle='solid', alpha=0.5)
 
+plt.figure()
+plt.title('Natural scene')
+for i in np.arange(0, len(ns_cell_ids), 7):
+    plt.plot(1*i*np.ones(dff_ns.shape[1])+ dff_ns[i], color = 'blue', linestyle = 'solid')
+xcoords = np.arange(0, dff_ns.shape[1], 7)
+for xc in xcoords:
+    plt.axvline(x=xc, color = 'gray', linestyle='solid', alpha=0.8, lw = 2)
+plt.ylabel('Neurons')
+plt.xlabel('Frames')
 
 
 ######## Singular value decomposition of NS responses for given stim ##########
